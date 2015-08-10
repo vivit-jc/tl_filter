@@ -93,12 +93,12 @@ get '/twitter/callback' do
       break unless(timeline.last)
       max_id = timeline.last.id
     end
+
+    @twarray = @twarray.select{|p|word_match?(p.full_text)}
+    haml :scan, :format => :html5
+
   rescue => @exception
     haml :error, :format => :html5
-    raise
   end
 
-  @twarray = @twarray.select{|p|word_match?(p.full_text)}
-
-  haml :scan, :format => :html5
 end
