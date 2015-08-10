@@ -1,0 +1,36 @@
+!!!html5
+%html
+  %body
+    %p 抽出 #{@twarray.size} 件
+    %hr
+    - @twarray.each do |p|
+      .post
+        .user
+          %span.name
+            - if p.retweeted_tweet?
+              - user = p.retweeted_status.user
+            - else
+              - user = p.user
+            - userurl = user.url
+            %a(href=userurl target="_")
+              =user.name
+          %span.screen_name
+            @#{user.screen_name}
+          %span.posted_at
+            - posturl = p.url
+            %a(href=posturl target="_")
+              =p.created_at
+        .text
+          - if p.retweeted_tweet?
+            - post = p.retweeted_status.text
+          - else
+            - post = p.text
+          - if p.uris?
+            - p.uris.each do |uri|
+              - str = uri[:uri]
+              - post = post.gsub(str,"<a href=#{str}>#{str}</a>")
+          - if p.media?
+            - p.media.each do |m|
+              - post += "<p><img src=#{m.media_url} width=100></p>"
+          =post
+      %hr
