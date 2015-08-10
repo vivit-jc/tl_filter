@@ -98,7 +98,8 @@ get '/twitter/callback' do
     haml :scan, :format => :html5
 
   rescue => @exception
-    if(@twarray = @twarray.select{|p|word_match?(p.full_text)}.size > 0)
+    @twarray = @twarray.select{|p|word_match?(p.full_text)}
+    if(@twarray.size > 0)
       haml :scan, :format => :html5
     else
       haml :error, :format => :html5
