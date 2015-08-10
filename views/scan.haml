@@ -1,7 +1,7 @@
 !!!html5
 %html
   %body
-    %p 抽出 #{@twarray.size} 件
+    %p 抽出 #{@twarray.size} 件 (約 #{@count*200} tweetを解析)
     %hr
     - @twarray.each do |p|
       .post

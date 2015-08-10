@@ -65,7 +65,7 @@ get '/twitter/callback' do
       :oauth_verifier => params[:oauth_verifier])
   rescue OAuth::Unauthorized => @exception
     # 本来はエラー画面を表示したほうが良いが、今回はSinatra標準のエラー画面を表示
-    raise
+    haml :error, :format => :html5
   end
  
   # TwitterAPI ライブラリ 設定(2/2)
@@ -78,17 +78,24 @@ get '/twitter/callback' do
   # 本来であれば上記情報をDBなどに保存
  
   # タイムラインの情報を取得、表示
-  @twarray = []
-  timeline =  twitter_client.user_timeline(twitter_client.user, exclude_replies: true)
-  @twarray += timeline
-  max_id = timeline.last.id
-  200.times do |i|
-    sleep(0.3)
-    timeline =  twitter_client.user_timeline(twitter_client.user, max_id: max_id, exclude_replies: true)
-    timeline.delete_at(0)
+  begin
+    @count = 1
+    @twarray = []
+    timeline =  twitter_client.user_timeline(twitter_client.user, count: 200, exclude_replies: true)
     @twarray += timeline
-    break unless(timeline.last)
     max_id = timeline.last.id
+    16.times do |i|
+      @count += 1
+      sleep(0.5)
+      timeline =  twitter_client.user_timeline(twitter_client.user, count: 200, max_id: max_id, exclude_replies: true)
+      timeline.delete_at(0)
+      @twarray += timeline
+      break unless(timeline.last)
+      max_id = timeline.last.id
+    end
+  rescue => @exception
+    haml :error, :format => :html5
+    raise
   end
 
   @twarray = @twarray.select{|p|word_match?(p.full_text)}
