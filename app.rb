@@ -84,7 +84,7 @@ get '/twitter/callback' do
     timeline =  twitter_client.user_timeline(twitter_client.user, count: 200, exclude_replies: true)
     @twarray += timeline
     max_id = timeline.last.id
-    16.times do |i|
+    10.times do |i|
       @count += 1
       sleep(0.5)
       timeline =  twitter_client.user_timeline(twitter_client.user, count: 200, max_id: max_id, exclude_replies: true)
