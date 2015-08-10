@@ -32,7 +32,7 @@ end
 get '/' do
 
   @tweet_button = <<EOS
-  <a href="https://twitter.com/share" class="twitter-share-button" data-via="vivit_jc">Tweet</a><script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+  <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a><script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
 EOS
 
   haml :index, :format => :html5
@@ -84,7 +84,7 @@ get '/twitter/callback' do
     timeline =  twitter_client.user_timeline(twitter_client.user, count: 200, exclude_replies: true)
     @twarray += timeline
     max_id = timeline.last.id
-    10.times do |i|
+    15.times do |i|
       @count += 1
       sleep(0.5)
       timeline =  twitter_client.user_timeline(twitter_client.user, count: 200, max_id: max_id, exclude_replies: true)
