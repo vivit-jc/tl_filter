@@ -1,7 +1,7 @@
 !!!html5
 %html
   %body
-    %p 抽出 #{@twarray.size} 件 (約 #{@count*200} tweetを解析)
+    %p 抽出 #{@twarray.size} 件 (約 #{@count} tweetを解析)
     %hr
     - @twarray.each do |p|
       .post
@@ -13,13 +13,17 @@
               - user = p.user
             - userurl = user.url
             %a(href=userurl target="_")
+              %img{src: "http://twiticon.herokuapp.com/"+user.screen_name}
+              %br
               =user.name
           %span.screen_name
             @#{user.screen_name}
           %span.posted_at
             - posturl = p.url
+            =p.created_at
             %a(href=posturl target="_")
-              =p.created_at
+              (post)
+
         .text
           - if p.retweeted_tweet?
             - post = p.retweeted_status.text
@@ -27,7 +31,7 @@
             - post = p.text
           - if p.uris?
             - p.uris.each do |uri|
-              - str = uri[:uri]
+              - str = uri.uri
               - post = post.gsub(str,"<a href=#{str}>#{str}</a>")
           - if p.media?
             - p.media.each do |m|

@@ -1,12 +1,16 @@
 # encoding: utf-8
 
+require 'rubygems'
 require 'sinatra'
 require 'oauth'
 require 'twitter'
+require 'pp'
  
 # Sessionの有効化
 enable :sessions
- 
+
+set :server, 'webrick'
+
 # Twitter API情報の設定
 YOUR_CONSUMER_KEY = "YluJnabpe3Zjnc2CR1ptiJCcW"
 YOUR_CONSUMER_SECRET = "zuLj0BiQffcw0O9nBShfWNvrdzdOankPE33nrQk4EaFSoAoaL2"
@@ -15,14 +19,19 @@ twitter_client = Twitter::REST::Client.new do |config|
   config.consumer_key = YOUR_CONSUMER_KEY
   config.consumer_secret = YOUR_CONSUMER_SECRET
 end
- 
- 
+
+def collect_with_max_id(collection=[], max_id=nil, &block)
+  response = yield(max_id)
+  collection += response
+  response.empty? ? collection.flatten : collect_with_max_id(collection, response.last.id - 1, &block)
+end
+
 def oauth_consumer
   return OAuth::Consumer.new(YOUR_CONSUMER_KEY, YOUR_CONSUMER_SECRET, :site => "https://api.twitter.com")
 end
  
 def word_match?(text)
-  ["コミケ","コミックマーケット","冬コミ","89","新刊","入稿","おしながき","お品書き","表紙","委託","とら","メロン","予約","pixiv"].each do |str|
+  ["コミケ","コミックマーケット","冬コミ","89","新刊","入稿","頒布","告知","おしながき","お品書き","表紙","委託","とら","虎","メロン","予約","pixiv"].each do |str|
     return true if(text.include?(str))
   end
   return false
@@ -41,8 +50,8 @@ end
 # Twitter認証
 get '/twitter/auth' do
   # callback先のURLを指定する 
-#  callback_url = "http://localhost:9393/twitter/callback"
-  callback_url = "https://oshinagaki.herokuapp.com/twitter/callback"
+  callback_url = "http://localhost:4567/twitter/callback"
+#  callback_url = "https://oshinagaki.herokuapp.com/twitter/callback"
   request_token = oauth_consumer.get_request_token(:oauth_callback => callback_url)
  
   # セッションにトークンを保存
@@ -76,29 +85,24 @@ get '/twitter/callback' do
     config.access_token = access_token.token
     config.access_token_secret = access_token.secret
   end
-  # 本来であれば上記情報をDBなどに保存
- 
+
+  def twitter_client.get_all_tweets(user)
+    collect_with_max_id do |max_id|
+      options = {count: 200, include_rts: true}
+      options[:max_id] = max_id unless max_id.nil?
+      user_timeline(user, options)
+    end
+  end
+
   # タイムラインの情報を取得、表示
   begin
-    @count = 1
-    @twarray = []
-    timeline =  twitter_client.user_timeline(twitter_client.user, count: 200, exclude_replies: true)
-    @twarray += timeline
-    max_id = timeline.last.id
-    15.times do |i|
-      @count += 1
-      sleep(0.4)
-      timeline =  twitter_client.user_timeline(twitter_client.user, count: 200, max_id: max_id, exclude_replies: true)
-      timeline.delete_at(0)
-      @twarray += timeline
-      break unless(timeline.last)
-      max_id = timeline.last.id
-    end
-
+    @twarray = twitter_client.get_all_tweets(twitter_client.user)
+    @count = @twarray.size
     @twarray = @twarray.select{|p|word_match?(p.full_text)}
     haml :scan, :format => :html5
 
   rescue Twitter::Error::TooManyRequests => @error
+    @count = @twarray.size
     @twarray = @twarray.select{|p|word_match?(p.full_text)}
     if(@twarray.size > 0)
       haml :scan, :format => :html5
