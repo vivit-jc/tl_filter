@@ -2,7 +2,16 @@
 %html
   %body
     %h1 エラー
-    =@exception
+    =@error
+    %br
+    =@error.rate_limit.limit
+    %br
+    =@error.rate_limit.reset_at
+    %br
+    =@error.rate_limit.reset_in
+    %br
+    =@error.rate_limit.remaining
+    
     %br
     何度も出る場合は
     %a(href="https://twitter.com/vivit_jc")

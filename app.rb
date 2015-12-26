@@ -22,7 +22,7 @@ def oauth_consumer
 end
  
 def word_match?(text)
-  ["コミケ","夏コミ","C88","新刊","入稿","おしながき","お品書き","委託","予約","pixiv"].each do |str|
+  ["コミケ","コミックマーケット","冬コミ","89","新刊","入稿","おしながき","お品書き","表紙","委託","とら","メロン","予約","pixiv"].each do |str|
     return true if(text.include?(str))
   end
   return false
@@ -41,6 +41,7 @@ end
 # Twitter認証
 get '/twitter/auth' do
   # callback先のURLを指定する 
+#  callback_url = "http://localhost:9393/twitter/callback"
   callback_url = "https://oshinagaki.herokuapp.com/twitter/callback"
   request_token = oauth_consumer.get_request_token(:oauth_callback => callback_url)
  
@@ -86,7 +87,7 @@ get '/twitter/callback' do
     max_id = timeline.last.id
     15.times do |i|
       @count += 1
-      sleep(0.5)
+      sleep(0.4)
       timeline =  twitter_client.user_timeline(twitter_client.user, count: 200, max_id: max_id, exclude_replies: true)
       timeline.delete_at(0)
       @twarray += timeline
@@ -97,7 +98,7 @@ get '/twitter/callback' do
     @twarray = @twarray.select{|p|word_match?(p.full_text)}
     haml :scan, :format => :html5
 
-  rescue => @exception
+  rescue Twitter::Error::TooManyRequests => @error
     @twarray = @twarray.select{|p|word_match?(p.full_text)}
     if(@twarray.size > 0)
       haml :scan, :format => :html5
