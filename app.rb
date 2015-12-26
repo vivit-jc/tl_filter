@@ -50,8 +50,8 @@ end
 # Twitter認証
 get '/twitter/auth' do
   # callback先のURLを指定する 
-  callback_url = "http://localhost:4567/twitter/callback"
-#  callback_url = "https://oshinagaki.herokuapp.com/twitter/callback"
+#  callback_url = "http://localhost:4567/twitter/callback"
+  callback_url = "https://oshinagaki.herokuapp.com/twitter/callback"
   request_token = oauth_consumer.get_request_token(:oauth_callback => callback_url)
  
   # セッションにトークンを保存
