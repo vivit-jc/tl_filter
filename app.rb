@@ -12,12 +12,12 @@ enable :sessions
 set :server, 'webrick'
 
 # Twitter API情報の設定
-YOUR_CONSUMER_KEY = "YluJnabpe3Zjnc2CR1ptiJCcW"
-YOUR_CONSUMER_SECRET = "zuLj0BiQffcw0O9nBShfWNvrdzdOankPE33nrQk4EaFSoAoaL2"
+CONSUMER_KEY = ENV['CONSUMER_KEY']
+CONSUMER_SECRET = ENV['CONSUMER_SECRET']
 # TwitterAPI ライブラリ 設定(1/2)
 twitter_client = Twitter::REST::Client.new do |config|
-  config.consumer_key = YOUR_CONSUMER_KEY
-  config.consumer_secret = YOUR_CONSUMER_SECRET
+  config.consumer_key = CONSUMER_KEY
+  config.consumer_secret = CONSUMER_SECRET
 end
 
 def collect_with_max_id(collection=[], max_id=nil, &block)
@@ -27,7 +27,7 @@ def collect_with_max_id(collection=[], max_id=nil, &block)
 end
 
 def oauth_consumer
-  return OAuth::Consumer.new(YOUR_CONSUMER_KEY, YOUR_CONSUMER_SECRET, :site => "https://api.twitter.com")
+  return OAuth::Consumer.new(CONSUMER_KEY, CONSUMER_SECRET, :site => "https://api.twitter.com")
 end
  
 def word_match?(text)
@@ -80,8 +80,8 @@ get '/twitter/callback' do
  
   # TwitterAPI ライブラリ 設定(2/2)
   twitter_client = Twitter::REST::Client.new do |config|
-    config.consumer_key = YOUR_CONSUMER_KEY
-    config.consumer_secret = YOUR_CONSUMER_SECRET
+    config.consumer_key = CONSUMER_KEY
+    config.consumer_secret = CONSUMER_SECRET
     config.access_token = access_token.token
     config.access_token_secret = access_token.secret
   end
